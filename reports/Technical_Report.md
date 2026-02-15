@@ -7,7 +7,7 @@
 
 ---
 
-**Code Repository:** [Insert Link to GitHub Repo]
+**Code Repository:** https://github.com/yllkeberisha24/predicting-fast-growing-firms
 
 ---
 
@@ -37,6 +37,29 @@ To align the model with business objectives, we defined an asymmetric loss funct
 * **False Negative (FN) Cost = 10:** The high opportunity cost of missing a potential "unicorn."
 * **Goal:** Minimize Expected Loss, rather than just maximizing Accuracy.
 
+**Relevant Code Snippets:**
+**Loss Function Specification:** To align the model's performance with business objectives, we defined an asymmetric loss function that penalizes missed opportunities more heavily than administrative errors:
+```python
+# Defined cost ratio based on business context
+FP = 2   # Admin cost of reviewing a candidate
+FN = 10  # Opportunity cost of missing a high-growth firm
+cost_ratio = FN / FP
+
+# Goal: Minimize Expected Loss per firm
+# Loss = (FP * False_Positives + FN * False_Negatives) / N
+```
+**Random Forest Configuration:** To ensure robustness and prevent overfitting, we instantiated the Random Forest classifier with the following hyperparameters, choosing a conservative number of features per split (max_features=5) and a high minimum node size (min_samples_split=15):
+```python
+# Random Forest Classifier Setup
+rf_model = RandomForestClassifier(
+    n_estimators=500,        # Sufficient trees to stabilize predictions
+    max_features=5,          # Controls correlation between trees
+    min_samples_split=15,    # Regularization to prevent overfitting
+    random_state=42,
+    n_jobs=-1
+)
+```
+
 ---
 
 ## 3. Model Selection & Results
@@ -65,6 +88,25 @@ Due to the high cost of False Negatives (FN=10), the optimal decision threshold 
 
 ![Expected Loss Function](../outputs/loss_plot.png)
 > **Figure 2:** The optimal threshold shifts left (~0.18) to minimize the high penalty of missing high-growth firms.
+
+**Relevant Code Snippets:**
+
+**Threshold Optimization Logic:** This logic iterates through cross-validation folds to identify the classification threshold that minimizes expected loss by maximizing the cost-sensitive Youden index.
+```python
+# Loop through thresholds to minimize Expected Loss
+best_thresholds = []
+expected_loss = []
+
+for fold in cv_folds:
+    # ... predict probabilities ...
+    
+    # Minimize loss function:
+    optimal_threshold = sorted(list(zip(
+        np.abs(tpr + (1 - prevalence)/(cost_ratio * prevalence) * (1 - fpr)),
+        thresholds)), key=lambda i: i, reverse=True)[1]
+        
+    best_thresholds.append(optimal_threshold)
+```
 
 ### 3.3 Variable Importance
 To interpret the "black box" of the Random Forest, we analyzed feature importance. As shown in **Figure 3**, `sales_mil` (size) and `d1_sales_mil_log` (past growth) are the dominant predictors. Notably, when individual dummy variables are grouped, `ind2_cat` (Industry) emerges as a critical driver of growth probability.

@@ -73,4 +73,24 @@ Standard classification models use a 50% threshold (i.e., "invest if it's more l
 
 We optimized the decision threshold to minimize total expected loss. The data dictates an **optimal threshold of ~18%**.
 
-* **Interpretation:** If the model says a firm has an **18% chance**
+* **Interpretation:** If the model says a firm has an **18% chance** of becoming a unicorn, the potential upside is high enough to justify the due diligence cost. We should invest.
+
+#### Figure 1: Expected Loss Minimization
+*The chart below shows how our specific Business Loss (Y-axis) is minimized at a Probability Threshold of ~0.18 (X-axis).*
+
+![Loss Function Plot](../outputs/loss_plot.png)
+*(Note: The curve is lowest around 0.18, confirming that a lower threshold reduces overall financial risk.)*
+
+---
+
+## 6. Sector-Specific Strategy
+
+We applied the model separately to the Manufacturing and Services sectors. The results justify a differentiated approach.
+
+| Industry | Predictive Power (AUC) | Optimal Threshold | Recommendation |
+| :--- | :--- | :--- | :--- |
+| **Services** | **High (0.684)** | **Aggressive (~8%)** | **Primary Target.** The model ranks these firms well. We should be very aggressive, investigating even low-probability candidates to capture volume. |
+| **Manufacturing**| Moderate (0.623) | Conservative (~15%) | **Secondary Target.** The model struggles to differentiate winners here. Maintain a higher standard of proof before investing. |
+
+### Final Recommendation
+Deploy the **Random Forest model** immediately for the **Services sector** screening process using the 8-18% probability range as the entry criteria for due diligence. For Manufacturing, use the model as a supplementary tool but rely more heavily on traditional expert analysis.
